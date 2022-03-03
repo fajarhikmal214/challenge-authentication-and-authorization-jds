@@ -1,1 +1,1 @@
-# challenge-authentication-and-authorization-jds
+# Challenge Authentication and Authorization - JDS Intern
