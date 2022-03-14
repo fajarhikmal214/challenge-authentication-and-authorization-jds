@@ -1,36 +1,32 @@
 import 'reflect-metadata';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { configValidationSchema } from './config.schema';
-
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './users/users.module';
+import { RoleModule } from './roles/roles.module';
+import { PermissionModule } from './permissions/permissions.module';
+import { UserProfileModule } from './user-profiles/user-profiles.module';
+import { UserSocialAccountModule } from './user-social-accounts/user-social-accounts.module';
+import { InstitutionModule } from './institutions/institution.module';
+import { DatabaseConnectionService } from './database-connection.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [`.env`],
       validationSchema: configValidationSchema,
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'postgres',
-        autoLoadEntities: true,
-        synchronize: true,
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        entities: ['dist/**/*.entity.js'],
-        migrations: ['dist/database/migrations/*.js'],
-        cli: {
-          migrationsDir: 'src/database/migrations',
-        },
-        factories: ['dist/database/factories/**/*.js'],
-        seeds: ['dist/database/seeds/**/*.js'],
-      }),
+      useClass: DatabaseConnectionService,
     }),
+    AuthModule,
+    UserModule,
+    RoleModule,
+    PermissionModule,
+    UserProfileModule,
+    UserSocialAccountModule,
+    InstitutionModule,
   ],
 })
 export class AppModule {}
