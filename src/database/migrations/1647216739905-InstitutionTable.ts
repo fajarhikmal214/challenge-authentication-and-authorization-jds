@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class RoleTable1646957453995 implements MigrationInterface {
-  private tableName = 'role';
+export class InstitutionTable1647216739905 implements MigrationInterface {
+  private tableName = 'institution';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -21,6 +21,11 @@ export class RoleTable1646957453995 implements MigrationInterface {
             type: 'varchar',
             length: '192',
             isNullable: false,
+          },
+          {
+            name: 'description',
+            type: 'text',
+            isNullable: true,
           },
           {
             name: 'created_at',

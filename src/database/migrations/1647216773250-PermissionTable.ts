@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class RoleTable1646957453995 implements MigrationInterface {
-  private tableName = 'role';
+export class PermissionTable1647216773250 implements MigrationInterface {
+  private tableName = 'permission';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -23,16 +23,9 @@ export class RoleTable1646957453995 implements MigrationInterface {
             isNullable: false,
           },
           {
-            name: 'created_at',
-            type: 'timestamp',
-            default: 'CURRENT_TIMESTAMP(6)',
-            isNullable: false,
-          },
-          {
-            name: 'updated_at',
-            type: 'timestamp',
-            default: 'CURRENT_TIMESTAMP(6)',
-            onUpdate: 'CURRENT_TIMESTAMP(6)',
+            name: 'description',
+            type: 'varchar',
+            length: '192',
             isNullable: false,
           },
         ],

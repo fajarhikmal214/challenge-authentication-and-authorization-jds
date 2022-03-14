@@ -1,7 +1,13 @@
-import { MigrationInterface, QueryRunner, Table } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableForeignKey,
+} from 'typeorm';
 
-export class RoleTable1646957453995 implements MigrationInterface {
-  private tableName = 'role';
+export class UserSocialAccountTable1647216765506 implements MigrationInterface {
+  private tableName = 'user_social_account';
+  private userTableName = 'user';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -17,7 +23,18 @@ export class RoleTable1646957453995 implements MigrationInterface {
             default: 'uuid_generate_v4()',
           },
           {
-            name: 'name',
+            name: 'user_id',
+            type: 'uuid',
+            isNullable: false,
+          },
+          {
+            name: 'provider_user_id',
+            type: 'varchar',
+            length: '192',
+            isNullable: false,
+          },
+          {
+            name: 'provider_name',
             type: 'varchar',
             length: '192',
             isNullable: false,
@@ -37,11 +54,21 @@ export class RoleTable1646957453995 implements MigrationInterface {
           },
         ],
       }),
-      true,
+    );
+
+    await queryRunner.createForeignKey(
+      this.tableName,
+      new TableForeignKey({
+        columnNames: ['user_id'],
+        referencedColumnNames: ['id'],
+        referencedTableName: this.userTableName,
+        onDelete: 'CASCADE',
+      }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.dropForeignKey(this.tableName, 'user_id');
     await queryRunner.query(`DROP TABLE ${this.tableName}`);
   }
 }

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class RoleTable1646957453995 implements MigrationInterface {
-  private tableName = 'role';
+export class UserTable1647216727282 implements MigrationInterface {
+  private tableName = 'user';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -19,7 +19,25 @@ export class RoleTable1646957453995 implements MigrationInterface {
           {
             name: 'name',
             type: 'varchar',
-            length: '192',
+            length: '255',
+            isNullable: false,
+          },
+          {
+            name: 'email',
+            type: 'varchar',
+            length: '255',
+            isNullable: false,
+          },
+          {
+            name: 'password',
+            type: 'varchar',
+            length: '255',
+            isNullable: false,
+          },
+          {
+            name: 'is_active',
+            type: 'boolean',
+            default: true,
             isNullable: false,
           },
           {
@@ -34,6 +52,12 @@ export class RoleTable1646957453995 implements MigrationInterface {
             default: 'CURRENT_TIMESTAMP(6)',
             onUpdate: 'CURRENT_TIMESTAMP(6)',
             isNullable: false,
+          },
+          {
+            name: 'deleted_at',
+            type: 'timestamp',
+            default: 'null',
+            isNullable: true,
           },
         ],
       }),
