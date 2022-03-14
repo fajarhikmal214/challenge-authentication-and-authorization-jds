@@ -88,8 +88,17 @@ export class UserProfileTable1647216750779 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey(this.tableName, 'user_id');
-    await queryRunner.dropForeignKey(this.tableName, 'institution_id');
+    const thisTable = await queryRunner.getTable(this.tableName);
+
+    const userIdForeignKey = thisTable.foreignKeys.find(
+      (fk) => fk.columnNames.indexOf('user_id') !== -1,
+    );
+    const institutionIdForeignKey = thisTable.foreignKeys.find(
+      (fk) => fk.columnNames.indexOf('institution_id') !== -1,
+    );
+
+    await queryRunner.dropForeignKey(this.tableName, userIdForeignKey);
+    await queryRunner.dropForeignKey(this.tableName, institutionIdForeignKey);
     await queryRunner.query(`DROP TABLE ${this.tableName}`);
   }
 }

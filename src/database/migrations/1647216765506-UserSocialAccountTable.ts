@@ -68,7 +68,13 @@ export class UserSocialAccountTable1647216765506 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey(this.tableName, 'user_id');
+    const thisTable = await queryRunner.getTable(this.tableName);
+
+    const userIdForeignKey = thisTable.foreignKeys.find(
+      (fk) => fk.columnNames.indexOf('user_id') !== -1,
+    );
+
+    await queryRunner.dropForeignKey(this.tableName, userIdForeignKey);
     await queryRunner.query(`DROP TABLE ${this.tableName}`);
   }
 }

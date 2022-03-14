@@ -52,8 +52,17 @@ export class UserHasRoleTable1647216782794 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey(this.tableName, 'user_id');
-    await queryRunner.dropForeignKey(this.tableName, 'role_id');
+    const thisTable = await queryRunner.getTable(this.tableName);
+
+    const userIdForeignKey = thisTable.foreignKeys.find(
+      (fk) => fk.columnNames.indexOf('user_id') !== -1,
+    );
+    const roleIdForeignKey = thisTable.foreignKeys.find(
+      (fk) => fk.columnNames.indexOf('role_id') !== -1,
+    );
+
+    await queryRunner.dropForeignKey(this.tableName, userIdForeignKey);
+    await queryRunner.dropForeignKey(this.tableName, roleIdForeignKey);
     await queryRunner.dropTable(this.tableName);
   }
 }
