@@ -10,15 +10,18 @@ import { PermissionModule } from './permissions/permissions.module';
 import { UserProfileModule } from './user-profiles/user-profiles.module';
 import { UserSocialAccountModule } from './user-social-accounts/user-social-accounts.module';
 import { InstitutionModule } from './institutions/institution.module';
-import { DatabaseConnectionService } from './database-connection.service';
+import { DatabaseConnection } from './config/database-connection.config';
+import jwt from './config/jwt.config';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       validationSchema: configValidationSchema,
       isGlobal: true,
+      load: [jwt],
     }),
     TypeOrmModule.forRootAsync({
-      useClass: DatabaseConnectionService,
+      useClass: DatabaseConnection,
     }),
     AuthModule,
     UserModule,
