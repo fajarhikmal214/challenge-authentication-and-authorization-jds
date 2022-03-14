@@ -1,22 +1,32 @@
 import 'reflect-metadata';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { configValidationSchema } from './config.schema';
-import { DatabaseConfig } from './config/database.config';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './users/users.module';
+import { RoleModule } from './roles/roles.module';
+import { PermissionModule } from './permissions/permissions.module';
+import { UserProfileModule } from './user-profiles/user-profiles.module';
+import { UserSocialAccountModule } from './user-social-accounts/user-social-accounts.module';
+import { InstitutionModule } from './institutions/institution.module';
+import { DatabaseConnectionService } from './database-connection.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [`.env`],
       validationSchema: configValidationSchema,
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async () => DatabaseConfig,
+      useClass: DatabaseConnectionService,
     }),
+    AuthModule,
+    UserModule,
+    RoleModule,
+    PermissionModule,
+    UserProfileModule,
+    UserSocialAccountModule,
+    InstitutionModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
