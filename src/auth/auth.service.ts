@@ -80,6 +80,14 @@ export class AuthService {
     return user;
   }
 
+  async me(request) {
+    return 'me';
+  }
+
+  async refreshToken(request) {
+    return 'refresh token';
+  }
+
   async generateJwtToken(user: User): Promise<ResponseJWT> {
     const { id } = user;
 

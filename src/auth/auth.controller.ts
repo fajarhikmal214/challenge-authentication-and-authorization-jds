@@ -1,10 +1,19 @@
-import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AuthGuard } from '@nestjs/passport';
 import { google } from 'googleapis';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 
-@Controller('v1/auth')
+@Controller('v1/auth/users')
 export class AuthController {
   private oAuth2Client: any;
 
@@ -50,6 +59,29 @@ export class AuthController {
   @Post('/google/authenticate')
   async authenticate(@Body() request, @Res() response): Promise<void> {
     const data = await this.authService.authenticate(request);
+
+    return response.status(HttpStatus.OK).send({
+      statusCode: HttpStatus.OK,
+      message: 'User signed in successfully',
+      data,
+    });
+  }
+
+  @Post('/me')
+  @UseGuards(AuthGuard())
+  async me(@Body() request, @Res() response): Promise<void> {
+    const data = await this.authService.me(request);
+
+    return response.status(HttpStatus.OK).send({
+      statusCode: HttpStatus.OK,
+      message: 'User signed in successfully',
+      data,
+    });
+  }
+
+  @Post('/refresh-token')
+  async refreshToken(@Body() request, @Res() response): Promise<void> {
+    const data = await this.authService.refreshToken(request);
 
     return response.status(HttpStatus.OK).send({
       statusCode: HttpStatus.OK,
