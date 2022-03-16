@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { google } from 'googleapis';
 import { AuthService } from './auth.service';
@@ -30,6 +30,20 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       message: 'User signed in successfully',
       data,
+    });
+  }
+
+  @Get('/get-google-auth-url')
+  async getGoogleAuthUrl(@Res() response): Promise<any> {
+    const scopes = ['email', 'profile'];
+
+    const url = this.oAuth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: scopes,
+    });
+
+    response.send({
+      url,
     });
   }
 
