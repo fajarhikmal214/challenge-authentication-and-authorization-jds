@@ -7,32 +7,84 @@ import { User } from 'src/users/user.entity';
 import { ResponseJWT } from './auth.interface';
 import { AuthRepository } from './auth.repository';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { google, Auth } from 'googleapis';
 
 @Injectable()
 export class AuthService {
+  oauth2Client: Auth.OAuth2Client;
+
   constructor(
     @InjectRepository(AuthRepository)
     private authRepository: AuthRepository,
     private configService: ConfigService,
     private jwtService: JwtService,
-  ) {}
+  ) {
+    this.oauth2Client = new google.auth.OAuth2(
+      this.configService.get('GOOGLE_CLIENT_ID'),
+      this.configService.get('GOOGLE_CLIENT_SECRET'),
+      this.configService.get('GOOGLE_CALLBACK_URL'),
+    );
+  }
 
   async signIn(authCredentialsDto: AuthCredentialsDto): Promise<ResponseJWT> {
     const { email, password } = authCredentialsDto;
+    const user = await this.handleRegisteredUser(email, password);
 
+    const responseJwt = await this.generateJwtToken(user);
+    return responseJwt;
+  }
+
+  async authenticate(request: any) {
+    const code = request.code;
+    const { tokens } = await this.oauth2Client.getToken(code);
+
+    if (!tokens) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const tokenInfo = await this.getUserData(tokens.access_token);
+
+    if (!tokenInfo) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const user = await this.handleRegisteredUser(tokenInfo.email);
+
+    const responseJwt = await this.generateJwtToken(user);
+    return responseJwt;
+  }
+
+  async getUserData(token: string) {
+    const userInfoClient = google.oauth2('v2').userinfo;
+
+    this.oauth2Client.setCredentials({
+      access_token: token,
+    });
+
+    const userInfoResponse = await userInfoClient.get({
+      auth: this.oauth2Client,
+    });
+
+    return userInfoResponse.data;
+  }
+
+  async handleRegisteredUser(
+    email: string,
+    password: string | undefined = undefined,
+  ): Promise<any> {
     const user = await this.authRepository.findOne({ email });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+    if (Boolean(password)) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+    }
 
     if (!user.isActive) throw new UnauthorizedException('User is not active');
 
     if (user.deletedAt) throw new UnauthorizedException('User is deleted');
 
-    const responseJwt = await this.generateJwtToken(user);
-
-    return responseJwt;
+    return user;
   }
 
   async generateJwtToken(user: User): Promise<ResponseJWT> {
