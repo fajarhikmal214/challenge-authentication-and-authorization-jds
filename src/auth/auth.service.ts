@@ -35,7 +35,7 @@ export class AuthService {
   }
 
   async authenticate(request: any) {
-    const code = request.code;
+    const code = request.query.code;
     const { tokens } = await this.oauth2Client.getToken(code);
 
     if (!tokens) {

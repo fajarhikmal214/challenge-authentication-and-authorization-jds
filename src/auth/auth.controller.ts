@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { google } from 'googleapis';
 import { AuthService } from './auth.service';
@@ -47,8 +55,8 @@ export class AuthController {
     });
   }
 
-  @Post('/google/authenticate')
-  async authenticate(@Body() request, @Res() response): Promise<void> {
+  @Get('/google/authenticate')
+  async authenticate(@Req() request, @Res() response): Promise<void> {
     const data = await this.authService.authenticate(request);
 
     return response.status(HttpStatus.OK).send({
