@@ -22,7 +22,6 @@ export class AuthService {
     this.oauth2Client = new google.auth.OAuth2(
       this.configService.get('GOOGLE_CLIENT_ID'),
       this.configService.get('GOOGLE_CLIENT_SECRET'),
-      this.configService.get('GOOGLE_CALLBACK_URL'),
     );
   }
 
@@ -35,14 +34,8 @@ export class AuthService {
   }
 
   async authenticate(request: any) {
-    const code = request.query.code;
-    const { tokens } = await this.oauth2Client.getToken(code);
-
-    if (!tokens) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const tokenInfo = await this.getUserData(tokens.access_token);
+    const token = request.token;
+    const tokenInfo = await this.getUserData(token);
 
     if (!tokenInfo) {
       throw new UnauthorizedException('Invalid credentials');
