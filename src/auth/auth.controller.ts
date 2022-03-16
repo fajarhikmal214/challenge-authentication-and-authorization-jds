@@ -57,6 +57,8 @@ export class AuthController {
 
   @Get('/google/authenticate')
   async authenticate(@Req() request, @Res() response): Promise<void> {
+    console.log(request);
+
     const data = await this.authService.authenticate(request);
 
     return response.status(HttpStatus.OK).send({
