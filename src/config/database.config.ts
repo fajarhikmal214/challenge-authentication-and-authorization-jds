@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import { ConnectionOptions } from 'typeorm';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const DatabaseConfig: ConnectionOptions & {
   seeds: string[];
   factories: string[];
@@ -11,8 +13,9 @@ const DatabaseConfig: ConnectionOptions & {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  ssl: {
-    rejectUnauthorized: false,
+  ssl: isProduction,
+  extra: {
+    ssl: isProduction ? { rejectUnauthorized: false } : null,
   },
   synchronize: false,
   entities: ['dist/**/*.entity.{js,ts}'],
