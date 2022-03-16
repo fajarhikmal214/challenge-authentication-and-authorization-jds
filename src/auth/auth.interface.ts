@@ -6,5 +6,11 @@ export interface ResponseJWT {
 }
 
 export interface JwtPayload {
+  identifier: string;
+}
+
+export interface ResponseMe {
+  id: string;
+  name: string;
   email: string;
 }

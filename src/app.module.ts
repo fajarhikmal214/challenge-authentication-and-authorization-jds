@@ -11,14 +11,12 @@ import { UserProfileModule } from './user-profiles/user-profiles.module';
 import { UserSocialAccountModule } from './user-social-accounts/user-social-accounts.module';
 import { InstitutionModule } from './institutions/institution.module';
 import { DatabaseConnection } from './config/database-connection.config';
-import jwt from './config/jwt.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       validationSchema: configValidationSchema,
       isGlobal: true,
-      load: [jwt],
     }),
     TypeOrmModule.forRootAsync({
       useClass: DatabaseConnection,
