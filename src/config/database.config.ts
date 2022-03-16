@@ -11,6 +11,9 @@ const DatabaseConfig: ConnectionOptions & {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
+  ssl: {
+    rejectUnauthorized: false,
+  },
   synchronize: false,
   entities: ['dist/**/*.entity.{js,ts}'],
   migrations: [__dirname + '/../database/migrations/*.{js,ts}'],
