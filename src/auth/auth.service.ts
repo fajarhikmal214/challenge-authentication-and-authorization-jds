@@ -4,10 +4,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/user.entity';
-import { ResponseJWT } from './auth.interface';
+import { ResponseJWT, ResponseMe } from './auth.interface';
 import { AuthRepository } from './auth.repository';
-import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { SignInDto } from './dto/sign-in.dto';
 import { google, Auth } from 'googleapis';
+import { GoogleAuthenticateDto } from './dto/google-authenticate.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -25,74 +27,117 @@ export class AuthService {
     );
   }
 
-  async signIn(authCredentialsDto: AuthCredentialsDto): Promise<ResponseJWT> {
-    const { email, password } = authCredentialsDto;
-    const user = await this.handleRegisteredUser(email, password);
+  async signIn(signInDto: SignInDto): Promise<ResponseJWT> {
+    const { email, password } = signInDto;
 
-    const responseJwt = await this.generateJwtToken(user);
-    return responseJwt;
-  }
+    const user = await this.authRepository.findByEmail(email);
+    if (!user)
+      throw new UnauthorizedException('Email dan Kata Sandi tidak ditemukan');
 
-  async authenticate(request: any) {
-    const token = request.token;
-    const tokenInfo = await this.getUserData(token);
-
-    if (!tokenInfo) {
-      throw new UnauthorizedException('Invalid credentials');
+    if (Boolean(password)) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch)
+        throw new UnauthorizedException('Email dan Kata Sandi tidak ditemukan');
     }
 
-    const user = await this.handleRegisteredUser(tokenInfo.email);
+    if (!user.isActive) throw new UnauthorizedException('Akun tidak aktif');
 
-    const responseJwt = await this.generateJwtToken(user);
+    if (user.deletedAt)
+      throw new UnauthorizedException('Email dan Kata Sandi tidak ditemukan');
+
+    const responseJwt = await this.generateJwtToken(user.id);
     return responseJwt;
   }
 
-  async getUserData(token: string) {
+  async googleAuthenticate(
+    googleAuthenticateDto: GoogleAuthenticateDto,
+  ): Promise<ResponseJWT> {
+    const { access_token } = googleAuthenticateDto;
+    const userInfo = await this.getUserInfoFromGoogle(access_token);
+
+    if (!userInfo) {
+      throw new UnauthorizedException(
+        'Login dengan Google gagal, silahkan coba lagi',
+      );
+    }
+
+    const user = await this.authRepository.findByEmail(userInfo.email);
+    if (!user) throw new UnauthorizedException('Akun tidak ditemukan');
+
+    if (!user.isActive) throw new UnauthorizedException('Akun tidak aktif');
+
+    if (user.deletedAt) throw new UnauthorizedException('Akun tidak ditemukan');
+
+    const responseJwt = await this.generateJwtToken(user.id);
+    return responseJwt;
+  }
+
+  async me(user: User): Promise<ResponseMe> {
+    const { id, name, email } = user;
+
+    const data = {
+      id,
+      name,
+      email,
+    };
+
+    return data;
+  }
+
+  async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<ResponseJWT> {
+    const { refresh_token } = refreshTokenDto;
+    const payload = await this.verifyRefreshToken(refreshTokenDto);
+
+    if (!payload) throw new UnauthorizedException('Refresh token tidak valid');
+
+    const decodeRefreshToken = await this.decodeJwtToken(refresh_token);
+
+    const user = await this.authRepository.findOne(payload.id);
+    if (!user) throw new UnauthorizedException('Akun tidak ditemukan');
+
+    if (!user.isActive) throw new UnauthorizedException('Akun tidak aktif');
+
+    if (user.deletedAt) throw new UnauthorizedException('Akun tidak ditemukan');
+
+    const responseJwt = await this.generateJwtToken(
+      decodeRefreshToken.identifier,
+    );
+
+    return responseJwt;
+  }
+
+  async getUserInfoFromGoogle(access_token: string) {
     const userInfoClient = google.oauth2('v2').userinfo;
 
     this.oauth2Client.setCredentials({
-      access_token: token,
+      access_token,
     });
 
     const userInfoResponse = await userInfoClient.get({
       auth: this.oauth2Client,
     });
 
+    if (!userInfoResponse.data) return null;
     return userInfoResponse.data;
   }
 
-  async handleRegisteredUser(
-    email: string,
-    password: string | undefined = undefined,
-  ): Promise<any> {
-    const user = await this.authRepository.findOne({ email });
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+  async verifyRefreshToken(refreshToken: RefreshTokenDto): Promise<any> {
+    const { refresh_token } = refreshToken;
 
-    if (Boolean(password)) {
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+    try {
+      const payload = await this.jwtService.verify(refresh_token, {
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+        algorithms: this.configService.get('JWT_REFRESH_TOKEN_ALGORITHM'),
+      });
+      return payload;
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token tidak valid');
     }
-
-    if (!user.isActive) throw new UnauthorizedException('User is not active');
-
-    if (user.deletedAt) throw new UnauthorizedException('User is deleted');
-
-    return user;
   }
 
-  async me(request) {
-    return 'me';
-  }
-
-  async refreshToken(request) {
-    return 'refresh token';
-  }
-
-  async generateJwtToken(user: User): Promise<ResponseJWT> {
-    const { id } = user;
-
-    const access_token = await this.generateAccessToken(id);
-    const refresh_token = await this.generateRefreshToken(id);
+  async generateJwtToken(identifier: string): Promise<ResponseJWT> {
+    const access_token = await this.createAccessToken(identifier);
+    const refresh_token = await this.createRefreshToken(identifier);
 
     const decodeAccessToken = await this.decodeJwtToken(access_token);
 
@@ -106,29 +151,33 @@ export class AuthService {
     return data;
   }
 
-  async generateAccessToken(id: string): Promise<string> {
+  async createAccessToken(identifier: string): Promise<string> {
     return this.jwtService.sign(
-      { id },
+      { identifier },
       {
-        expiresIn: this.configService.get('JWT_EXPIRES_IN'),
-        secret: this.configService.get('JWT_SECRET'),
-        algorithm: this.configService.get('JWT_ALGORITHM'),
+        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN'),
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
+        algorithm: this.configService.get('JWT_ACCESS_TOKEN_ALGORITHM'),
       },
     );
   }
 
-  async generateRefreshToken(id: string): Promise<string> {
+  async createRefreshToken(identifier: string): Promise<string> {
     return this.jwtService.sign(
-      { id },
+      { identifier },
       {
-        expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN'),
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
-        algorithm: this.configService.get('JWT_REFRESH_ALGORITHM'),
+        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+        algorithm: this.configService.get('JWT_REFRESH_TOKEN_ALGORITHM'),
       },
     );
   }
 
   async decodeJwtToken(token: string): Promise<any> {
-    return this.jwtService.decode(token);
+    try {
+      return this.jwtService.decode(token);
+    } catch (error) {
+      throw new UnauthorizedException('Token tidak valid');
+    }
   }
 }

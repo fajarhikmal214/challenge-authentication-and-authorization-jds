@@ -1,91 +1,72 @@
 import {
   Body,
   Controller,
-  Get,
   HttpStatus,
   Post,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { google } from 'googleapis';
+import { User } from 'src/users/user.entity';
 import { AuthService } from './auth.service';
-import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { GoogleAuthenticateDto } from './dto/google-authenticate.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { SignInDto } from './dto/sign-in.dto';
+import { GetUser } from './get-user.decorator';
 
 @Controller('v1/auth/users')
 export class AuthController {
-  private oAuth2Client: any;
-
-  constructor(
-    private authService: AuthService,
-    private configService: ConfigService,
-  ) {
-    this.oAuth2Client = new google.auth.OAuth2(
-      this.configService.get('GOOGLE_CLIENT_ID'),
-      this.configService.get('GOOGLE_CLIENT_SECRET'),
-      this.configService.get('GOOGLE_CALLBACK_URL'),
-    );
-  }
+  constructor(private authService: AuthService) {}
 
   @Post('/sign-in')
-  async signIn(
-    @Body() authCredentialsDto: AuthCredentialsDto,
-    @Res() response,
-  ): Promise<any> {
-    const data = await this.authService.signIn(authCredentialsDto);
+  async signIn(@Body() signInDto: SignInDto, @Res() response): Promise<any> {
+    const data = await this.authService.signIn(signInDto);
 
     return response.status(HttpStatus.OK).send({
       statusCode: HttpStatus.OK,
-      message: 'User signed in successfully',
+      message: 'Autentikasi berhasil dilakukan',
       data,
     });
   }
 
-  @Get('/get-google-auth-url')
-  async getGoogleAuthUrl(@Res() response): Promise<any> {
-    const scopes = ['email', 'profile'];
-
-    const url = this.oAuth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: scopes,
-    });
-
-    response.send({
-      url,
-    });
-  }
-
   @Post('/google/authenticate')
-  async authenticate(@Body() request, @Res() response): Promise<void> {
-    const data = await this.authService.authenticate(request);
+  async authenticate(
+    @Body() googleAuthenticateDto: GoogleAuthenticateDto,
+    @Res() response,
+  ): Promise<void> {
+    const data = await this.authService.googleAuthenticate(
+      googleAuthenticateDto,
+    );
 
     return response.status(HttpStatus.OK).send({
       statusCode: HttpStatus.OK,
-      message: 'User signed in successfully',
+      message: 'Autentikasi berhasil dilakukan',
       data,
     });
   }
 
   @Post('/me')
   @UseGuards(AuthGuard())
-  async me(@Body() request, @Res() response): Promise<void> {
-    const data = await this.authService.me(request);
+  async me(@GetUser() user: User, @Res() response): Promise<void> {
+    const data = await this.authService.me(user);
 
     return response.status(HttpStatus.OK).send({
       statusCode: HttpStatus.OK,
-      message: 'User signed in successfully',
+      message: 'Memuat data diri berhasil dilakukan',
       data,
     });
   }
 
   @Post('/refresh-token')
-  async refreshToken(@Body() request, @Res() response): Promise<void> {
-    const data = await this.authService.refreshToken(request);
+  async refreshToken(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @Res() response,
+  ): Promise<void> {
+    const data = await this.authService.refreshToken(refreshTokenDto);
 
     return response.status(HttpStatus.OK).send({
       statusCode: HttpStatus.OK,
-      message: 'User signed in successfully',
+      message: 'Melakukan pembaruan token berhasil dilakukan',
       data,
     });
   }
