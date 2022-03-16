@@ -1,2 +1,2 @@
 release: ENV_SILENT=true
-web: npm run start:dev
+web: npm run start:prod
