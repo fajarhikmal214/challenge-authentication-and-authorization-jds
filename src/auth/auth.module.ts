@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { GoogleStrategy } from './google.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy/jwt.strategy';
+import { UserTokenRepository } from '../users/repositories/user-token.repository';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
         },
       }),
     }),
-    TypeOrmModule.forFeature([AuthRepository]),
+    TypeOrmModule.forFeature([AuthRepository, UserTokenRepository]),
   ],
   providers: [AuthService, GoogleStrategy, JwtStrategy],
   controllers: [AuthController],

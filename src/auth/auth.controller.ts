@@ -1,13 +1,14 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { GoogleAuthenticateDto } from './dto/google-authenticate.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -24,7 +25,7 @@ export class AuthController {
 
     return response.status(HttpStatus.OK).send({
       statusCode: HttpStatus.OK,
-      message: 'Autentikasi berhasil dilakukan',
+      message: 'Melakukan sign in berhasil dilakukan',
       data,
     });
   }
@@ -40,12 +41,12 @@ export class AuthController {
 
     return response.status(HttpStatus.OK).send({
       statusCode: HttpStatus.OK,
-      message: 'Autentikasi berhasil dilakukan',
+      message: 'Melakukan sign in berhasil dilakukan',
       data,
     });
   }
 
-  @Post('/me')
+  @Get('/me')
   @UseGuards(AuthGuard())
   async me(@GetUser() user: User, @Res() response): Promise<void> {
     const data = await this.authService.me(user);
@@ -67,6 +68,21 @@ export class AuthController {
     return response.status(HttpStatus.OK).send({
       statusCode: HttpStatus.OK,
       message: 'Melakukan pembaruan token berhasil dilakukan',
+      data,
+    });
+  }
+
+  @Post('/sign-out')
+  @UseGuards(AuthGuard())
+  async signOut(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @Res() response,
+  ): Promise<void> {
+    const data = await this.authService.signOut(refreshTokenDto);
+
+    return response.status(HttpStatus.OK).send({
+      statusCode: HttpStatus.OK,
+      message: 'Melakukan sign out berhasil dilakukan',
       data,
     });
   }
