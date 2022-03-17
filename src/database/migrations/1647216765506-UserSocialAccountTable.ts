@@ -28,16 +28,18 @@ export class UserSocialAccountTable1647216765506 implements MigrationInterface {
             isNullable: false,
           },
           {
-            name: 'provider_user_id',
+            name: 'provider_identifier',
             type: 'varchar',
             length: '192',
             isNullable: false,
+            isUnique: true,
           },
           {
             name: 'provider_name',
             type: 'varchar',
             length: '192',
             isNullable: false,
+            isUnique: true,
           },
           {
             name: 'created_at',

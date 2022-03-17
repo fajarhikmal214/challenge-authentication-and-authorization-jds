@@ -1,23 +1,41 @@
-import { User } from 'src/users/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { Factory, Seeder } from 'typeorm-seeding';
 import { createQueryBuilder } from 'typeorm';
 import { UserSocialAccount } from 'src/user-social-accounts/user-social-account.entity';
+import { getRepository } from 'typeorm';
 
 export default class CreateUserSocialAccounts implements Seeder {
   public async run(factory: Factory): Promise<any> {
-    const providerName = ['facebook', 'google', 'github', 'keyclock'];
-    const users = await createQueryBuilder()
-      .select('id')
-      .from(User, 'user')
-      .execute();
+    const userSocialAccountRepository = getRepository(UserSocialAccount);
+    const userRepository = getRepository(User);
 
-    for (const user of users) {
-      for (let i = 0; i < Math.floor(Math.random() * 4) + 1; i++) {
-        await factory(UserSocialAccount)().create({
-          providerName: providerName[i],
-          user,
-        });
-      }
-    }
+    const user = await userRepository.findOne({
+      email: 'groupware.whitelabel@gmail.com',
+    });
+
+    await userSocialAccountRepository.save({
+      providerIdentifier: 'groupware.whitelabel@gmail.com',
+      providerName: 'google',
+      user: user,
+    });
+
+    // const providerName = ['facebook', 'google', 'github', 'keyclock'];
+    // const users = await createQueryBuilder()
+    //   .select('id')
+    //   .from(User, 'user')
+    //   .execute();
+
+    // for (const user of users) {
+    //   if (user.email == user.email) {
+    //     continue;
+    //   }
+
+    //   for (let i = 0; i < Math.floor(Math.random() * 4) + 1; i++) {
+    //     await factory(UserSocialAccount)().create({
+    //       providerName: providerName[i],
+    //       user,
+    //     });
+    //   }
+    // }
   }
 }

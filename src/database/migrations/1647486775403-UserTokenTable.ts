@@ -5,10 +5,9 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class UserProfileTable1647216750779 implements MigrationInterface {
-  private tableName = 'user_profile';
+export class UserToken1647486775403 implements MigrationInterface {
+  private tableName = 'user_token';
   private userTableName = 'user';
-  private institutionTableName = 'institution';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -27,40 +26,30 @@ export class UserProfileTable1647216750779 implements MigrationInterface {
             name: 'user_id',
             type: 'uuid',
             isNullable: false,
-            isUnique: true,
           },
           {
-            name: 'institution_id',
-            type: 'uuid',
+            name: 'refresh_token',
+            type: 'varchar',
+            length: '255',
             isNullable: false,
           },
           {
-            name: 'birth_date',
-            type: 'date',
-            isNullable: true,
+            name: 'expired_time',
+            type: 'int',
+            isNullable: false,
           },
           {
-            name: 'birth_place',
-            type: 'varchar',
-            length: '192',
-            isNullable: true,
+            name: 'created_at',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP(6)',
+            isNullable: false,
           },
           {
-            name: 'gender',
-            type: 'char',
-            length: '1',
-            isNullable: true,
-          },
-          {
-            name: 'employment_status',
-            type: 'varchar',
-            length: '20',
-            isNullable: true,
-          },
-          {
-            name: 'is_pns',
-            type: 'boolean',
-            isNullable: true,
+            name: 'updated_at',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP(6)',
+            onUpdate: 'CURRENT_TIMESTAMP(6)',
+            isNullable: false,
           },
         ],
       }),
@@ -76,16 +65,6 @@ export class UserProfileTable1647216750779 implements MigrationInterface {
         onDelete: 'CASCADE',
       }),
     );
-
-    await queryRunner.createForeignKey(
-      this.tableName,
-      new TableForeignKey({
-        columnNames: ['institution_id'],
-        referencedColumnNames: ['id'],
-        referencedTableName: this.institutionTableName,
-        onDelete: 'CASCADE',
-      }),
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -94,12 +73,8 @@ export class UserProfileTable1647216750779 implements MigrationInterface {
     const userIdForeignKey = thisTable.foreignKeys.find(
       (fk) => fk.columnNames.indexOf('user_id') !== -1,
     );
-    const institutionIdForeignKey = thisTable.foreignKeys.find(
-      (fk) => fk.columnNames.indexOf('institution_id') !== -1,
-    );
 
     await queryRunner.dropForeignKey(this.tableName, userIdForeignKey);
-    await queryRunner.dropForeignKey(this.tableName, institutionIdForeignKey);
     await queryRunner.query(`DROP TABLE ${this.tableName}`);
   }
 }

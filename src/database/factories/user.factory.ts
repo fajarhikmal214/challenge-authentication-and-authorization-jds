@@ -1,4 +1,4 @@
-import { User } from 'src/users/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { define } from 'typeorm-seeding';
 import { faker } from '@faker-js/faker';
 import { nanoid } from 'nanoid';
@@ -35,7 +35,7 @@ define(UserProfile, () => {
 define(UserSocialAccount, () => {
   const userSocialAccount = new UserSocialAccount();
 
-  userSocialAccount.providerUserId = nanoid();
+  userSocialAccount.providerIdentifier = nanoid();
 
   return userSocialAccount;
 });
