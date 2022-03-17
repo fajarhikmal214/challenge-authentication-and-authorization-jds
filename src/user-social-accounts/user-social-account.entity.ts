@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User } from '../users/entities/user.entity';
 
 @Entity()
 export class UserSocialAccount {
@@ -20,11 +20,11 @@ export class UserSocialAccount {
 
   @Column({
     type: 'varchar',
-    name: 'provider_user_id',
+    name: 'provider_identifier',
     length: 192,
     nullable: false,
   })
-  public providerUserId: string;
+  public providerIdentifier: string;
 
   @Column({
     type: 'varchar',
