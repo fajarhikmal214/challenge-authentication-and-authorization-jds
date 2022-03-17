@@ -11,9 +11,10 @@ import {
   JoinTable,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserProfile } from '../user-profiles/user-profile.entity';
-import { Role } from '../roles/role.entity';
-import { UserSocialAccount } from '../user-social-accounts/user-social-account.entity';
+import { UserProfile } from '../../user-profiles/user-profile.entity';
+import { Role } from '../../roles/role.entity';
+import { UserSocialAccount } from '../../user-social-accounts/user-social-account.entity';
+import { UserToken } from './user-token.entity';
 
 @Entity()
 export class User {
@@ -65,6 +66,9 @@ export class User {
     (userSocialAccount) => userSocialAccount.user,
   )
   public userSocialAccounts: UserSocialAccount[];
+
+  @OneToOne(() => UserToken, (userToken) => userToken.user)
+  public userToken: UserToken;
 
   @ManyToMany(() => Role)
   @JoinTable({
