@@ -11,6 +11,7 @@ import { UserProfileModule } from './user-profiles/user-profiles.module';
 import { UserSocialAccountModule } from './user-social-accounts/user-social-accounts.module';
 import { InstitutionModule } from './institutions/institution.module';
 import { DatabaseConnection } from './config/database-connection.config';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { DatabaseConnection } from './config/database-connection.config';
     UserProfileModule,
     UserSocialAccountModule,
     InstitutionModule,
+    CategoryModule,
   ],
 })
 export class AppModule {}
