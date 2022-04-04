@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 
@@ -14,6 +22,19 @@ export class CategoryController {
       statusCode: HttpStatus.OK,
       message: 'Success',
       data: categories,
+    });
+  }
+
+  @Get('find-tress')
+  async findTress(@Req() request, @Res() response): Promise<any> {
+    const treeCategoriesWithLimitedDepth = await this.categoryService.findTrees(
+      request,
+    );
+
+    return response.status(HttpStatus.OK).send({
+      statusCode: HttpStatus.OK,
+      message: 'Success',
+      data: treeCategoriesWithLimitedDepth,
     });
   }
 
