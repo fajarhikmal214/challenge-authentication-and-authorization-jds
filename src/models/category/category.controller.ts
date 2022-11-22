@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Req,
   Res,
@@ -26,10 +27,25 @@ export class CategoryController {
     });
   }
 
+  // Error nested-set happen when put param first without prefix
+  @Get('/id/:id')
+  async findCategoryById(
+    @Param('id') id: number,
+    @Res() response,
+  ): Promise<any> {
+    const category = await this.categoryService.findCategoryById(id);
+
+    return response.status(HttpStatus.CREATED).send({
+      statusCode: HttpStatus.OK,
+      message: 'Success',
+      data: category,
+    });
+  }
+
   @Post()
   async createNewCategory(
     @Body() createCategoryDto: CreateCategoryDto,
-    @Res() response,
+    @Res() response: Response,
   ): Promise<any> {
     const category = await this.categoryService.createNewCategory(
       createCategoryDto,
@@ -56,13 +72,8 @@ export class CategoryController {
   }
 
   @Post('root')
-  async createNewCategoryRoot(
-    @Body() createCategoryDto: CreateCategoryDto,
-    @Res() response,
-  ): Promise<any> {
-    const category = await this.categoryService.createNewCategoryRoot(
-      createCategoryDto,
-    );
+  async createNewCategoryRoot(@Res() response): Promise<any> {
+    const category = await this.categoryService.createNewCategoryRoot();
 
     return response.status(HttpStatus.CREATED).send({
       statusCode: HttpStatus.OK,

@@ -7,5 +7,5 @@ export class CreateCategoryDto {
 
   @IsNumber()
   @IsNotEmpty()
-  parent?: number;
+  parentId: number;
 }
