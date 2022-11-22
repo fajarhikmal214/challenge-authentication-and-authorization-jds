@@ -1,6 +1,6 @@
 import { define } from 'typeorm-seeding';
 import { faker } from '@faker-js/faker';
-import { Permission } from 'src/permissions/permission.entity';
+import { Permission } from 'src/models/permissions/permission.entity';
 import slugify from 'slugify';
 
 define(Permission, () => {

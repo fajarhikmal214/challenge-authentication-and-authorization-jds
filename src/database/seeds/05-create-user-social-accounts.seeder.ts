@@ -1,11 +1,10 @@
-import { User } from 'src/users/entities/user.entity';
+import { User } from 'src/models/users/entities/user.entity';
 import { Factory, Seeder } from 'typeorm-seeding';
-import { createQueryBuilder } from 'typeorm';
-import { UserSocialAccount } from 'src/user-social-accounts/user-social-account.entity';
+import { UserSocialAccount } from 'src/models/user-social-accounts/user-social-account.entity';
 import { getRepository } from 'typeorm';
 
 export default class CreateUserSocialAccounts implements Seeder {
-  public async run(factory: Factory): Promise<any> {
+  public async run(_factory: Factory): Promise<any> {
     const userSocialAccountRepository = getRepository(UserSocialAccount);
     const userRepository = getRepository(User);
 

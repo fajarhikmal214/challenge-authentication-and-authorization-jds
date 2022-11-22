@@ -7,6 +7,7 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 
@@ -25,6 +26,22 @@ export class CategoryController {
     });
   }
 
+  @Post()
+  async createNewCategory(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @Res() response,
+  ): Promise<any> {
+    const category = await this.categoryService.createNewCategory(
+      createCategoryDto,
+    );
+
+    return response.status(HttpStatus.CREATED).send({
+      statusCode: HttpStatus.OK,
+      message: 'Success',
+      data: category,
+    });
+  }
+
   @Get('find-tress')
   async findTress(@Req() request, @Res() response): Promise<any> {
     const treeCategoriesWithLimitedDepth = await this.categoryService.findTrees(
@@ -38,12 +55,12 @@ export class CategoryController {
     });
   }
 
-  @Post()
-  async createNewCategory(
+  @Post('root')
+  async createNewCategoryRoot(
     @Body() createCategoryDto: CreateCategoryDto,
     @Res() response,
   ): Promise<any> {
-    const category = await this.categoryService.createNewCategory(
+    const category = await this.categoryService.createNewCategoryRoot(
       createCategoryDto,
     );
 

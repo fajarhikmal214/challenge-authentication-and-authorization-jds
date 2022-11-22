@@ -1,4 +1,4 @@
-import { Role } from 'src/roles/role.entity';
+import { Role } from 'src/models/roles/role.entity';
 import { define } from 'typeorm-seeding';
 import { faker } from '@faker-js/faker';
 

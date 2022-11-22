@@ -17,6 +17,12 @@ export class CategoryService {
   }
 
   async createNewCategory(createCategoryDto: CreateCategoryDto): Promise<any> {
+    
+  }
+
+  async createNewCategoryRoot(
+    createCategoryDto: CreateCategoryDto,
+  ): Promise<any> {
     const { name } = createCategoryDto;
     const manager = getManager();
 
@@ -54,8 +60,6 @@ export class CategoryService {
 
   async findTrees(request: any): Promise<any> {
     const { depth } = request.query;
-
-    console.log(depth);
     const manager = getManager();
 
     try {

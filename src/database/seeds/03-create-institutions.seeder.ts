@@ -1,4 +1,4 @@
-import { Institution } from 'src/institutions/institution.entity';
+import { Institution } from 'src/models/institutions/institution.entity';
 import { Factory, Seeder } from 'typeorm-seeding';
 
 export default class CreateInstitutions implements Seeder {

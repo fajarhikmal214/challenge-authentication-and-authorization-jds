@@ -1,8 +1,8 @@
-import { UserProfile } from 'src/user-profiles/user-profile.entity';
-import { User } from 'src/users/entities/user.entity';
+import { UserProfile } from 'src/models/user-profiles/user-profile.entity';
+import { User } from 'src/models/users/entities/user.entity';
 import { Factory, Seeder } from 'typeorm-seeding';
 import { createQueryBuilder } from 'typeorm';
-import { Institution } from 'src/institutions/institution.entity';
+import { Institution } from 'src/models/institutions/institution.entity';
 
 export default class CreateUserProfiles implements Seeder {
   public async run(factory: Factory): Promise<any> {

@@ -8,13 +8,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from 'src/users/entities/user.entity';
+import { User } from 'src/models/users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { GoogleAuthenticateDto } from './dto/google-authenticate.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { GetUser } from './get-user.decorator';
-import lang from '../language/configuration';
+import lang from '../../language/configuration';
 
 @Controller('v1/auth/users')
 export class AuthController {
